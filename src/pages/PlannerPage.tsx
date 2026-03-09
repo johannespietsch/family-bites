@@ -16,20 +16,11 @@ import { useNavigate } from "react-router-dom";
 export default function PlannerPage() {
   const navigate = useNavigate();
   const prefs = loadPreferences();
+  const onboarded = isOnboarded();
   const [plan, setPlan] = useState<MealPlan | null>(null);
   const [dietStyle, setDietStyle] = useState<DietStyle>(prefs.dietStyle);
   const [swapTarget, setSwapTarget] = useState<Meal | null>(null);
   const [simplified, setSimplified] = useState(prefs.simplifiedMode);
-
-  if (!isOnboarded()) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4">
-        <h2 className="mb-2 text-2xl font-bold">Let's set up your preferences first!</h2>
-        <p className="mb-6 text-muted-foreground">A quick wizard to personalize your meal plans.</p>
-        <Button asChild size="lg"><Link to="/onboarding">Start setup →</Link></Button>
-      </div>
-    );
-  }
 
   const generate = useCallback(() => {
     const lockedMeals = plan?.meals.filter((m) => m.locked) || [];
