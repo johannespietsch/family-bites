@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Meal, DIET_LABELS } from "@/types";
-import { Lock, Unlock, RefreshCw, ArrowRightLeft, Clock, ChefHat } from "lucide-react";
+import { Lock, Unlock, RefreshCw, ArrowRightLeft, Clock, ChefHat, ExternalLink } from "lucide-react";
 
 interface MealCardProps {
   meal: Meal;
