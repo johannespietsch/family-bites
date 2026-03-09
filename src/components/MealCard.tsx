@@ -61,6 +61,9 @@ export default function MealCard({ meal, onToggleLock, onRegenerate, onSwap }: M
             <button onClick={onSwap} className="rounded-md bg-muted p-1 hover:bg-muted/80" title="Swap">
               <ArrowRightLeft className="h-3 w-3" />
             </button>
+            <button onClick={() => navigate(`/recipe/${r.id}`)} className="rounded-md bg-muted p-1 hover:bg-muted/80" title="View recipe">
+              <ExternalLink className="h-3 w-3" />
+            </button>
           </div>
         </motion.div>
       )}

@@ -30,6 +30,7 @@ const App = () => (
                   <Route path="/planner" element={<PlannerPage />} />
                   <Route path="/shopping" element={<ShoppingListPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/recipe/:id" element={<RecipePage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </>
