@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Meal, DIET_LABELS } from "@/types";
-import { Lock, Unlock, RefreshCw, ArrowRightLeft, Clock, ChefHat } from "lucide-react";
+import { Lock, Unlock, RefreshCw, ArrowRightLeft, Clock, ChefHat, ExternalLink } from "lucide-react";
 
 interface MealCardProps {
   meal: Meal;
@@ -12,6 +13,7 @@ interface MealCardProps {
 
 export default function MealCard({ meal, onToggleLock, onRegenerate, onSwap }: MealCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
   const r = meal.recipe;
 
   const effortColor = r.effortLevel === "easy" ? "text-primary" : r.effortLevel === "medium" ? "text-honey" : "text-accent";
@@ -58,6 +60,9 @@ export default function MealCard({ meal, onToggleLock, onRegenerate, onSwap }: M
             </button>
             <button onClick={onSwap} className="rounded-md bg-muted p-1 hover:bg-muted/80" title="Swap">
               <ArrowRightLeft className="h-3 w-3" />
+            </button>
+            <button onClick={() => navigate(`/recipe/${r.id}`)} className="rounded-md bg-muted p-1 hover:bg-muted/80" title="View recipe">
+              <ExternalLink className="h-3 w-3" />
             </button>
           </div>
         </motion.div>
