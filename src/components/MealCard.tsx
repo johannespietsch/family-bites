@@ -13,6 +13,7 @@ interface MealCardProps {
 
 export default function MealCard({ meal, onToggleLock, onRegenerate, onSwap }: MealCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
   const r = meal.recipe;
 
   const effortColor = r.effortLevel === "easy" ? "text-primary" : r.effortLevel === "medium" ? "text-honey" : "text-accent";
