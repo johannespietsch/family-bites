@@ -8,6 +8,7 @@ import OnboardingPage from "@/pages/OnboardingPage";
 import PlannerPage from "@/pages/PlannerPage";
 import ShoppingListPage from "@/pages/ShoppingListPage";
 import SettingsPage from "@/pages/SettingsPage";
+import RecipePage from "@/pages/RecipePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
