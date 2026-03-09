@@ -73,6 +73,16 @@ export default function PlannerPage() {
     ? Math.round(plan.meals.reduce((s, m) => s + m.recipe.cookingTimeMinutes, 0) / plan.meals.length)
     : 0;
 
+  if (!onboarded) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4">
+        <h2 className="mb-2 text-2xl font-bold">Let's set up your preferences first!</h2>
+        <p className="mb-6 text-muted-foreground">A quick wizard to personalize your meal plans.</p>
+        <Button asChild size="lg"><Link to="/onboarding">Start setup →</Link></Button>
+      </div>
+    );
+  }
+
   return (
     <div className="container px-4 py-6">
       {/* Header */}
