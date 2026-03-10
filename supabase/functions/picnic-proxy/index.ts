@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { crypto } from "https://deno.land/std@0.224.0/crypto/mod.ts";
-import { encodeHex } from "https://deno.land/std@0.224.0/encoding/hex.ts";
+import { Md5 } from "https://deno.land/std@0.160.0/hash/md5.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,14 +20,10 @@ const PICNIC_EXTRA_HEADERS: Record<string, string> = {
 };
 
 /**
- * MD5 hash using Deno std crypto (WebCrypto doesn't support MD5).
- * Picnic requires password to be MD5-hashed before sending.
+ * MD5 hash — Picnic requires password to be MD5-hashed before sending.
  */
-async function md5(input: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const hashBuffer = await crypto.subtle.digest("MD5", data);
-  return encodeHex(new Uint8Array(hashBuffer));
+function md5(input: string): string {
+  return new Md5().update(input).toString();
 }
 
 serve(async (req) => {
