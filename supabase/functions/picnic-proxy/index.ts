@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Md5 } from "https://deno.land/std@0.160.0/hash/md5.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,10 +19,13 @@ const PICNIC_EXTRA_HEADERS: Record<string, string> = {
 };
 
 /**
- * MD5 hash — Picnic requires password to be MD5-hashed before sending.
+ * Pure JS MD5 implementation — Picnic requires password to be MD5-hashed.
+ * Using npm:js-md5 for reliability in Deno edge runtime.
  */
+import jsMd5 from "npm:js-md5@0.8.3";
+
 function md5(input: string): string {
-  return new Md5().update(input).toString();
+  return jsMd5(input);
 }
 
 serve(async (req) => {
