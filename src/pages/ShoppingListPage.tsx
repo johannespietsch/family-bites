@@ -1,11 +1,18 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ShoppingItem } from "@/types";
-import { Check, ShoppingCart, Printer } from "lucide-react";
+import { Check, ShoppingCart, Printer, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isPicnicConnected, getPicnicSession } from "@/store/picnic-session";
+import { picnicSyncShoppingList } from "@/services/picnic";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export default function ShoppingListPage() {
   const [items, setItems] = useState<ShoppingItem[]>([]);
+  const [syncing, setSyncing] = useState(false);
+  const [syncProgress, setSyncProgress] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const stored = localStorage.getItem("family-meals-shopping");
@@ -24,6 +31,40 @@ export default function ShoppingListPage() {
   const inPantry = items.filter((i) => i.inPantry);
 
   const handlePrint = () => window.print();
+
+  const handleSendToPicnic = async () => {
+    const session = getPicnicSession();
+    if (!session) {
+      toast.error("Connect to Picnic in Settings first");
+      navigate("/settings");
+      return;
+    }
+
+    setSyncing(true);
+    setSyncProgress("Starting…");
+
+    try {
+      const result = await picnicSyncShoppingList(
+        session.authKey,
+        toBuy.map((i) => ({ name: i.ingredientName, quantity: i.quantity, unit: i.unit })),
+        (current, total, name) => {
+          setSyncProgress(`Adding ${name} (${current}/${total})`);
+        }
+      );
+
+      if (result.added.length > 0) {
+        toast.success(`Added ${result.added.length} items to Picnic cart`);
+      }
+      if (result.failed.length > 0) {
+        toast.warning(`Could not find ${result.failed.length} items: ${result.failed.join(", ")}`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Picnic sync failed");
+    } finally {
+      setSyncing(false);
+      setSyncProgress("");
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -98,12 +139,47 @@ export default function ShoppingListPage() {
         </div>
       )}
 
-      {/* Picnic placeholder */}
-      <div className="mt-8 rounded-2xl border-2 border-dashed border-border p-6 text-center">
-        <p className="mb-1 text-sm font-medium text-muted-foreground">🛒 Picnic Integration</p>
-        <p className="text-xs text-muted-foreground">
-          Connect your Picnic account in Settings to send items directly to your cart.
-        </p>
+      {/* Picnic Sync */}
+      <div className="mt-8 rounded-2xl border border-border bg-card p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <ShoppingCart className="h-5 w-5 text-primary" />
+          <h3 className="text-sm font-bold">Send to Picnic</h3>
+        </div>
+
+        {isPicnicConnected() ? (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Send your {toBuy.length} items to your Picnic shopping cart. We'll search for each ingredient and add the best match.
+            </p>
+            {syncProgress && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                {syncProgress}
+              </div>
+            )}
+            <Button
+              onClick={handleSendToPicnic}
+              disabled={syncing || toBuy.length === 0}
+              className="w-full gap-2"
+            >
+              {syncing ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Syncing…</>
+              ) : (
+                <><ShoppingCart className="h-4 w-4" /> Send {toBuy.length} items to Picnic</>
+              )}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+              <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              <span>Connect your Picnic account in Settings to send items directly to your cart.</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => navigate("/settings")} className="gap-1.5">
+              Go to Settings
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
