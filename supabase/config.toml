@@ -1,4 +1,4 @@
 project_id = "rxenewcivdomeyoxpjxr"
 
-[functions.picnic-proxy]
+[functions.picnic]
 verify_jwt = false

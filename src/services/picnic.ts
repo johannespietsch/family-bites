@@ -23,12 +23,14 @@ export interface PicnicSession {
   userId?: string;
 }
 
+const FUNCTION_NAME = "picnic";
+
 /** Log in to Picnic and return a session auth key */
 export async function picnicLogin(
   email: string,
   password: string
 ): Promise<PicnicSession> {
-  const { data, error } = await supabase.functions.invoke("picnic-proxy", {
+  const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, {
     body: { action: "login", email, password },
   });
   if (error) throw new Error(error.message || "Login request failed");
@@ -41,7 +43,7 @@ export async function picnicSearch(
   authKey: string,
   searchTerm: string
 ): Promise<PicnicProduct[]> {
-  const { data, error } = await supabase.functions.invoke("picnic-proxy", {
+  const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, {
     body: { action: "search", authKey, searchTerm },
   });
   if (error) throw new Error(error.message || "Search request failed");
@@ -63,7 +65,7 @@ export async function picnicAddToCart(
   productId: string,
   count = 1
 ): Promise<void> {
-  const { data, error } = await supabase.functions.invoke("picnic-proxy", {
+  const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, {
     body: { action: "addToCart", authKey, productId, count },
   });
   if (error) throw new Error(error.message || "Add to cart failed");
@@ -72,12 +74,6 @@ export async function picnicAddToCart(
 
 /**
  * Batch operation: search for each ingredient and add the first match to cart.
- * Returns a summary of successes and failures.
- *
- * To improve matching later:
- *   - Use ingredient synonyms / translations (e.g. "courgette" → "zucchini")
- *   - Score results by price, brand preference, or package size
- *   - Allow user to confirm/swap before adding
  */
 export async function picnicSyncShoppingList(
   authKey: string,
@@ -97,8 +93,6 @@ export async function picnicSyncShoppingList(
         failed.push(item.name);
         continue;
       }
-
-      // Pick the first result (basic heuristic — improve later)
       await picnicAddToCart(authKey, results[0].id, 1);
       added.push(item.name);
     } catch {
