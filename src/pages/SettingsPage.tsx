@@ -249,15 +249,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </motion.section>
   );
 }
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass-card rounded-2xl p-5"
-    >
-      <h2 className="mb-4 font-display text-lg font-bold">{title}</h2>
       {children}
     </motion.section>
   );
