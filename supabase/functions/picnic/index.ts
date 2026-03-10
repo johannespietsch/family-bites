@@ -1,4 +1,4 @@
-// Picnic API proxy edge function — pure JS MD5, zero external dependencies
+// Picnic API proxy edge function v5 — pure JS MD5, zero external dependencies
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
