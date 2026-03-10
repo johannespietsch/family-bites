@@ -43,7 +43,7 @@ serve(async (req) => {
         return jsonResponse({ error: "Email and password are required" }, 400);
       }
 
-      const secret = await md5(password);
+      const secret = md5(password);
 
       const res = await fetch(`${PICNIC_BASE}/user/login`, {
         method: "POST",
