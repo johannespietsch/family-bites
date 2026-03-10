@@ -2,10 +2,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { loadPreferences, savePreferences, resetOnboarding } from "@/store/preferences";
+import { getPicnicSession, setPicnicSession, clearPicnicSession, isPicnicConnected } from "@/store/picnic-session";
+import { picnicLogin } from "@/services/picnic";
 import {
   Preferences, DietStyle, DIET_LABELS, DIET_EMOJIS,
 } from "@/types";
-import { Save, RotateCcw } from "lucide-react";
+import { Save, RotateCcw, ShoppingCart, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 const CUISINES = ["Italian", "Asian", "Indian", "Mexican", "Dutch", "Greek", "American", "Middle Eastern"];
@@ -14,6 +16,10 @@ const ALLERGENS = ["Dairy", "Gluten", "Nuts", "Eggs", "Soy", "Fish"];
 
 export default function SettingsPage() {
   const [prefs, setPrefs] = useState<Preferences>(loadPreferences());
+  const [picnicEmail, setPicnicEmail] = useState("");
+  const [picnicPassword, setPicnicPassword] = useState("");
+  const [picnicLoading, setPicnicLoading] = useState(false);
+  const [picnicConnected, setPicnicConnected] = useState(isPicnicConnected());
 
   const update = (partial: Partial<Preferences>) => setPrefs((p) => ({ ...p, ...partial }));
 
@@ -37,6 +43,32 @@ export default function SettingsPage() {
   const handleReset = () => {
     resetOnboarding();
     window.location.href = "/onboarding";
+  };
+
+  const handlePicnicLogin = async () => {
+    if (!picnicEmail || !picnicPassword) {
+      toast.error("Enter your Picnic email and password");
+      return;
+    }
+    setPicnicLoading(true);
+    try {
+      const session = await picnicLogin(picnicEmail, picnicPassword);
+      setPicnicSession(session);
+      setPicnicConnected(true);
+      setPicnicPassword("");
+      toast.success("Connected to Picnic!");
+    } catch (err: any) {
+      toast.error(err.message || "Picnic login failed");
+    } finally {
+      setPicnicLoading(false);
+    }
+  };
+
+  const handlePicnicDisconnect = () => {
+    clearPicnicSession();
+    setPicnicConnected(false);
+    setPicnicEmail("");
+    toast.info("Disconnected from Picnic");
   };
 
   return (
@@ -145,14 +177,50 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        {/* Picnic */}
+        {/* Picnic Connection */}
         <Section title="🛒 Picnic Connection">
-          <div className="rounded-xl border-2 border-dashed border-border p-4 text-center">
-            <p className="text-sm text-muted-foreground">
-              Picnic integration requires a backend connection.
-              Enable Lovable Cloud to securely store your Picnic credentials and sync your shopping cart.
-            </p>
-          </div>
+          {picnicConnected ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-primary">
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="font-medium">Connected to Picnic</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Your session is active. Go to the Shopping List page to send items to your Picnic cart.
+              </p>
+              <Button variant="outline" size="sm" onClick={handlePicnicDisconnect} className="gap-1.5">
+                <XCircle className="h-3.5 w-3.5" /> Disconnect
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Enter your Picnic credentials to send shopping list items directly to your cart.
+                Credentials are only kept in memory for this session.
+              </p>
+              <input
+                type="email"
+                placeholder="Picnic email"
+                value={picnicEmail}
+                onChange={(e) => setPicnicEmail(e.target.value)}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
+              />
+              <input
+                type="password"
+                placeholder="Picnic password"
+                value={picnicPassword}
+                onChange={(e) => setPicnicPassword(e.target.value)}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
+              />
+              <Button onClick={handlePicnicLogin} disabled={picnicLoading} className="gap-2">
+                {picnicLoading ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Connecting…</>
+                ) : (
+                  <><ShoppingCart className="h-4 w-4" /> Connect to Picnic</>
+                )}
+              </Button>
+            </div>
+          )}
         </Section>
 
         {/* Actions */}
