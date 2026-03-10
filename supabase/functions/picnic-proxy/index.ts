@@ -1,4 +1,6 @@
+// Picnic API proxy edge function v2
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import jsMd5 from "npm:js-md5@0.8.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,12 +19,6 @@ const PICNIC_EXTRA_HEADERS: Record<string, string> = {
   "x-picnic-agent": "30100;1.15.232-15154",
   "x-picnic-did": "3C417201548B2E3B",
 };
-
-/**
- * Pure JS MD5 implementation — Picnic requires password to be MD5-hashed.
- * Using npm:js-md5 for reliability in Deno edge runtime.
- */
-import jsMd5 from "npm:js-md5@0.8.3";
 
 function md5(input: string): string {
   return jsMd5(input);
